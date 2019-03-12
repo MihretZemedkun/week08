@@ -77,7 +77,7 @@ A lookup of a non-local variable can involve some number of hops of the static c
 
 #### Variables Escaping the Scope of their Binding Occurrences
 
-The problem and solution described above doesn't work for more modern programming languages with functions as values. For example, consider the following fragment if JavaScript code
+The problem and solution described above doesn't work for more modern programming languages with functions as first-class values. For example, consider the following fragment of JavaScript code
 
 ```javascript
 const k = (x) => ((y) => x)
