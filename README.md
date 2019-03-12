@@ -87,7 +87,7 @@ const sixFun = k(6)                    +---+-------+
                                        +---+-------+
 ```
 
-In this example, function `k` is called with argument `6`. A stack frame is created and a function `(y) => x` is returned and stored in variable `sixFun`. Of course, after `k` returns its result, the activation record containing the binding of `x` is popped off the stack. How can `sixFun` work if the binding occurrence of `x` is gone? The answer is closures.
+In this example, function `k` is called with argument `6`. A stack frame is created and a function `(y) => x` is returned and stored in variable `sixFun`. Of course, after `k` returns its result, the activation record containing the binding of `x` is popped off the stack. How can `sixFun` work if the binding occurrence of `x` is gone? There are a number of different solutions including [closures](https://en.wikipedia.org/wiki/Closure_(computer_programming), [lambda lifting](https://en.wikipedia.org/wiki/Lambda_lifting) and [defunctionalization](https://en.wikipedia.org/wiki/Defunctionalization).
 
 We'll use the following OCaml simple code as an example to motivate how closure data structures work.
 
