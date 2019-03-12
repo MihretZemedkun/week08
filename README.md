@@ -36,7 +36,7 @@ If functions and procedures are prohibited from making recursive calls, their ac
 
 This is all reasonably simple and well-understood. However, if the language supports recursion *and* is *block-structured*, some extra plumbing is required to access variables that might be free in a nested function. Using Python notation, consider the following:
 
-```python
+```
                                   +---+-------+
   === - static chain              | h | e : 4 +======+
                                   +-+-+-------+      |  Looking up b in the body of h
@@ -73,7 +73,7 @@ f(2, 0)                           +-+-+ b : 2 +======+
                                                      =
 ```
 
-A lookup of a non-local variable can involve some number of hops of the static chain. Each hop entails a `LOD` instruction which is likely to be relatively slow. For this reason, compilers for languages with this combination of features would sometimes implement a `display`. A display contains local copies of non-local variables. Building a display on procedure entry is time consuming. And copying display entries back to their host activation records on function exit is time consuming too.
+A lookup of a non-local variable can involve some number of hops of the static chain. Each hop entails a `LOD` instruction which is likely to be relatively slow. For this reason, compilers for languages with this combination of features would sometimes implement a *display*. A display is an area of an activation record containing local copies of non-local variables. Building a display on procedure entry is time consuming. And copying display entries back to their host activation records on function exit is time consuming too.
 
 #### Variables Escaping the Scope of their Binding Occurrences
 
@@ -89,7 +89,7 @@ const sixFun = k(6)                    +---+-------+
 
 In this example, function `k` is called with argument `6`. A stack frame is created and a function `(y) => x` is returned and stored in variable `sixFun`. Of course, after `k` returns its result, the activation record containing the binding of `x` is popped off the stack. How can `sixFun` work if the binding occurrence of `x` is gone? The answer is closures.
 
-We'll use the following OCaml code to describe how closure data structures work.
+We'll use the following OCaml simple code as an example to motivate how closure data structures work.
 
 ```ocaml
 let g = 
