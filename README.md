@@ -59,7 +59,7 @@ A call stack topping out at `h` after a call initiated with `f(2, 0)`:
                                   +---+-------+
                                   | h | e : 4 |
                                   +-+-+-------+
-   |  - dynamic chain               V 
+   |  - dynamic chain               v 
    v                              +---+--------+
                                   | g | c : 0  |
                                   +-+-+ d : 12 |
