@@ -34,7 +34,65 @@ Functions/procedures are the primary abstraction mechanism in virtually all prog
 
 If functions and procedures are prohibited from making recursive calls, their activation records can be allocated in static memory — typically the `.data` segment of the image. But virtually all modern programming languages support recursion. This means that multiple activations of the same function or procedure can exist at the same time. For this reason, activation records are usually allocated in a stack, the *call stack*. The code compiled for programs in the language manage a special register, the *frame pointer* which points to a fixed position in the activation record. Input parameters and local storage can then be accessed via indirect addressing off of the frame pointer.
 
-This is all reasonably simple and well-understood. However, if the language supports recursion *and* is *block-structured*, some extra plumbing is required to access variables that might be free in a nested function. Using Python notation, consider the following:
+This is all reasonably simple and well-understood. However, if the language supports recursion *and* is *block-structured*, some extra plumbing is required to access variables that might be free in a nested function. Using Python notation, consider the following code:
+
+```python
+def f(a, b):
+    def g(c, d):
+        def h(e):
+            print b + d + e
+        if (c == 0):
+            h(4)
+        else:
+            g(c - 1, b + d)
+    if (a == 0):
+    	g(2, b)
+    else:
+        f(a - 1, b + 2)
+
+f(2, 0) 
+```
+
+A call stack topping out at `h` after a call initiated with `f(2, 0)`:
+
+```
+                                  +---+-------+
+                                  | h | e : 4 |
+                                  +-+-+-------+
+   |  - dynamic chain               V 
+   v                              +---+--------+
+                                  | g | c : 0  |
+                                  +-+-+ d : 12 |
+                                    | +--------+                                
+                                    v 
+                                  +---+-------+
+                                  | g | c : 1 |
+                                  +-+-+ d : 8 |
+                                    | +-------+
+def f(a, b):                        v
+    def g(c, d):                  +---+-------+
+        def h(e):                 | g | c : 2 |   When executing h, how do we find
+            print b + d + e       +-+-+ d : 4 |   the storage for b and d?
+        if (c == 0):                | +-------+
+            h(4)                    v
+        else:                     +---+-------+
+            g(c - 1, b + d)       | f | a : 0 |
+    if (a == 0):                  +-+-+ b : 4 |
+    	g(2, b)                     | +-------+
+    else:                           v 
+        f(a - 1, b + 2)           +---+-------+
+                                  | f | a : 1 |
+f(2, 0)                           +-+-+ b : 2 |
+                                    | +-------+
+                                    v
+                                  +---+-------+ 
+                                  | f | a : 2 |
+                                  +---+ b : 0 |
+                                      +-------+
+                                                     
+```
+
+We construct a chain of links to ARs for containing blocks and represent variables as *lexical addresses* of the form (hops, offset).
 
 ```
                                   +---+-------+
@@ -89,6 +147,8 @@ const sixFun = k(6)                    +---+-------+
 
 In this example, function `k` is called with argument `6`. A stack frame is created and a function `(y) => x` is returned and stored in variable `sixFun`. Of course, after `k` returns its result, the activation record containing the binding of `x` is popped off the stack. How can `sixFun` work if the binding occurrence of `x` is gone? There are a number of different solutions including [closures](https://en.wikipedia.org/wiki/Closure_(computer_programming)), [lambda lifting](https://en.wikipedia.org/wiki/Lambda_lifting) and [defunctionalization](https://en.wikipedia.org/wiki/Defunctionalization).
 
+##### Closures
+
 We'll use the following simple OCaml code as an example to motivate how closure data structures work.
 
 ```ocaml
@@ -115,7 +175,13 @@ in
 g.code {arg = 6; env = g.env}
 ```
 
-Note that each of the 3 record creations above would entail memory allocations (mallocs) and each of the 5 record projections (i.e., dots) above would give rise to `LOD` instructions. So closure creation and application are both relatively expensive as compared to a standard function call.
+Note that 
+
++ each of the 3 record creations above would entail memory allocations (mallocs);
++ each of the 5 field assignments would require a `STORE` instruction and
++ each of the 5 record projections (i.e., dots) above would give rise to `LOAD` instructions. 
+
+So closure creation and application are both relatively expensive as compared to a standard function call.
 
 ### 3. Introduction to the MiniC compiler
 
