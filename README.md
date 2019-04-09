@@ -17,7 +17,7 @@
 #### This Week
 
 1. Exam Review; Schedule Review
-2. Implementing Block-Structured Recursive Functions
+2. Implementing Block-Structured Recursive Functions; Closure Data Structures
 3. Introduction to the MiniC compiler
 
 ---
